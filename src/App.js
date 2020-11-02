@@ -10,21 +10,17 @@ import { User } from './models';
 Amplify.Logger.LOG_LEVEL = 'DEBUG';
 Amplify.configure(awsconfig);
 
-const wait = () => new Promise((resolve, _reject) => setTimeout(resolve, 5000));
-
-let someVal = 'Intern';
+const DUMMYCOUNT = 10;
 
 DataStore.configure({
   maxRecordsToSync: 30000,
   syncPageSize: 10000,
   syncExpressions: [
     syncExpression(User, (c) =>
-      c.id('eq', '6f277b3d-97d9-4075-abad-68c007b9f2de')
+      c.id('eq', 'e56c79bf-2490-4301-8384-e9990ba0a17e')
     ),
   ],
 });
-
-const DUMMYCOUNT = 10;
 
 async function createDummyData() {
   const jobTitles = ['Intern', 'SDM', 'SDE', 'FEE', 'Director', 'VP'];
@@ -71,6 +67,7 @@ function App() {
         console.log('HUB', event);
         if (event === 'ready') {
           setReady(true);
+          getAllUsers();
           return;
         }
         if (event === 'syncQueriesStarted') {
@@ -136,14 +133,6 @@ function App() {
     await DataStore.delete(User, Predicates.ALL);
   }
 
-  async function stopStart() {
-    someVal = 200;
-    await DataStore.stop();
-    await DataStore.start();
-
-    initiateUserSubscription();
-  }
-
   async function clearStart() {
     await DataStore.clear();
     await DataStore.start();
@@ -154,7 +143,6 @@ function App() {
     <div className="App">
       <header className="App-header">
         <button onClick={generateUsers}>Save {DUMMYCOUNT} New Records</button>
-        <button onClick={stopStart}>Stop & Start</button>
         <button onClick={clearStart}>Clear & Start</button>
         <button style={styles.deleteBtn} onClick={deleteAll}>
           Delete All
