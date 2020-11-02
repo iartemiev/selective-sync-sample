@@ -1,0 +1,14 @@
+type User
+  @model
+  @key(
+    name: "byUsername"
+    queryField: "userByUsername"
+    fields: ["username", "sortOrder"]
+  ) {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  username: String!
+  jobTitle: String
+  sortOrder: Int
+}
