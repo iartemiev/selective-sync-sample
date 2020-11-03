@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import mocker from 'mocker-data-generator';
-import Amplify, { Hub } from '@aws-amplify/core';
-import { DataStore, Predicates, syncExpression } from '@aws-amplify/datastore';
+import Amplify, {
+  Hub,
+  DataStore,
+  Predicates,
+  syncExpression,
+} from 'aws-amplify';
+// import { DataStore, Predicates, syncExpression } from '@aws-amplify/datastore';
 
 import awsconfig from './aws-exports.js';
 import { User } from './models';
