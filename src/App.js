@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import mocker from 'mocker-data-generator';
-import Amplify, {
-  Hub,
-  DataStore,
-  Predicates,
-  syncExpression,
-} from 'aws-amplify';
-// import { DataStore, Predicates, syncExpression } from '@aws-amplify/datastore';
+import Amplify, { Hub } from '@aws-amplify/core';
+import { DataStore, Predicates, syncExpression } from '@aws-amplify/datastore';
 
 import awsconfig from './aws-exports.js';
 import { User } from './models';
@@ -15,49 +10,19 @@ import { User } from './models';
 Amplify.Logger.LOG_LEVEL = 'DEBUG';
 Amplify.configure(awsconfig);
 
-const DUMMYCOUNT = 10;
+let jobTitle = null;
 
 DataStore.configure({
-  maxRecordsToSync: 30000,
-  syncPageSize: 10000,
   syncExpressions: [
-    syncExpression(User, (c) =>
-      c.id('eq', 'e56c79bf-2490-4301-8384-e9990ba0a17e')
-    ),
+    syncExpression(User, () => {
+      if (jobTitle) {
+        return (c) => c.jobTitle('eq', jobTitle);
+      }
+
+      return Predicates.ALL;
+    }),
   ],
 });
-
-async function createDummyData() {
-  const jobTitles = ['Intern', 'SDM', 'SDE', 'FEE', 'Director', 'VP'];
-  const user = {
-    firstName: {
-      faker: 'name.firstName',
-    },
-    lastName: {
-      faker: 'name.lastName',
-    },
-    username: {
-      function: function () {
-        return (
-          this.object.lastName.substring(0, 5) +
-          this.object.firstName.substring(0, 3) +
-          Math.floor(Math.random() * 10)
-        );
-      },
-    },
-    jobTitle: {
-      function: function () {
-        const idx = Math.floor(Math.random() * jobTitles.length);
-        return jobTitles[idx];
-      },
-    },
-    sortOrder: { faker: 'random.number' },
-  };
-
-  const { users } = await mocker().schema('users', user, DUMMYCOUNT).build();
-  console.log('dummies: ', users.length, users);
-  return users;
-}
 
 function App() {
   const [ready, setReady] = useState(false);
@@ -93,6 +58,7 @@ function App() {
 
   function initiateUserSubscription() {
     userSub = DataStore.observe(User).subscribe(({ element, opType }) => {
+      console.log('subscription', element, opType);
       const opTypeUpdaters = {
         DELETE: (users) => users.filter((user) => user.id !== element.id),
         INSERT: (users) => [element, ...users],
@@ -138,8 +104,16 @@ function App() {
     await DataStore.delete(User, Predicates.ALL);
   }
 
-  async function clearStart() {
+  async function changeSync() {
+    jobTitle = 'SDE';
     await DataStore.clear();
+    await DataStore.start();
+    initiateUserSubscription();
+  }
+
+  async function resetSync() {
+    jobTitle = null;
+    await DataStore.stop();
     await DataStore.start();
     initiateUserSubscription();
   }
@@ -148,7 +122,8 @@ function App() {
     <div className="App">
       <header className="App-header">
         <button onClick={generateUsers}>Save {DUMMYCOUNT} New Records</button>
-        <button onClick={clearStart}>Clear & Start</button>
+        <button onClick={changeSync}>Only Sync SDEs</button>
+        <button onClick={resetSync}>Sync All</button>
         <button style={styles.deleteBtn} onClick={deleteAll}>
           Delete All
         </button>
@@ -169,3 +144,37 @@ const styles = {
     marginTop: '20px',
   },
 };
+
+const DUMMYCOUNT = 10;
+
+async function createDummyData() {
+  const jobTitles = ['Intern', 'SDM', 'SDE', 'FEE', 'Director', 'VP'];
+  const user = {
+    firstName: {
+      faker: 'name.firstName',
+    },
+    lastName: {
+      faker: 'name.lastName',
+    },
+    username: {
+      function: function () {
+        return (
+          this.object.lastName.substring(0, 5) +
+          this.object.firstName.substring(0, 3) +
+          Math.floor(Math.random() * 10)
+        );
+      },
+    },
+    jobTitle: {
+      function: function () {
+        const idx = Math.floor(Math.random() * jobTitles.length);
+        return jobTitles[idx];
+      },
+    },
+    sortOrder: { faker: 'random.number' },
+  };
+
+  const { users } = await mocker().schema('users', user, DUMMYCOUNT).build();
+  console.log('dummies: ', users.length, users);
+  return users;
+}

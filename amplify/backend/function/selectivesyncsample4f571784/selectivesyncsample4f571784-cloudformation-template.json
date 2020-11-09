@@ -68,7 +68,7 @@
         "Layers": [],
         "Timeout": "25",
         "Code": {
-          "S3Bucket": "amplify-selectivesyncsample-sandbox-145945-deployment",
+          "S3Bucket": "amplify-selectivesyncsample-sandbox-164914-deployment",
           "S3Key": "amplify-builds/selectivesyncsample4f571784-466b375a594263357077-build.zip"
         }
       }

@@ -1,5 +1,25 @@
 export const schema = {
     "models": {
+        "Test": {
+            "name": "Test",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "Tests",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                }
+            ]
+        },
         "User": {
             "name": "User",
             "fields": {
@@ -52,11 +72,22 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUsername",
+                        "queryField": "userByUsername",
+                        "fields": [
+                            "username",
+                            "sortOrder"
+                        ]
+                    }
                 }
             ]
         }
     },
     "enums": {},
     "nonModels": {},
-    "version": "0071b16056588a18533611b305000b5f"
+    "version": "a99912354f97b7a166102bced40221cf"
 };

@@ -1,3 +1,7 @@
+type Test @model {
+  id: ID!
+}
+
 type User
   @model
   @key(
