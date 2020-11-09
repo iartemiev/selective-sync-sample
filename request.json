@@ -1,0 +1,14 @@
+{
+	"query": "query operation($limit: Int, $nextToken: String, $lastSync: AWSTimestamp, $syncExpression: ModelUserSyncExpressionInput) {\n  syncUsers(limit: $limit, nextToken: $nextToken, lastSync: $lastSync) {\n    items {\n      id\n      firstName\n      lastName\n      username\n      jobTitle\n      sortOrder\n      _version\n      _lastChangedAt\n      _deleted\n    }\n    nextToken\n    startedAt\n  }\n}\n",
+	"variables": {
+		"limit": 1000,
+		"nextToken": null,
+		"lastSync": 1601039219399,
+		"syncExpression": {
+			"and": [
+				{ "username": { "eq": "Bob" } },
+				{ "createdAt": { "gt": "2020-08-01" } }
+			]
+		}
+	}
+}
